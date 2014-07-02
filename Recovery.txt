@@ -1,0 +1,4 @@
+ Recovery is a process that brings a database into a consistent state. This means that committed transactions 
+ are applied to disk (redo phase) and transactions that are begun but not yet committed are 
+ rolled off (undo phase). The result is a database that contains only committed transactions — a consistent 
+ state. 
