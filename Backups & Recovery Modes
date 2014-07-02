@@ -1,0 +1,179 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Full backup: 
+This is a copy of all data in the database, including the transaction log. Using this 
+ backup type, you can restore the database to the point in time when the backup was taken. It is the 
+ most basic of the backups and is often required prior to any of the other backup types. When restoring 
+ from a full database backup, all the database files are restored without any other dependencies, 
+ the database is available, and it is transactionally consistent. 
+
+Partial backup: 
+This is a way to back 
+ up only those parts of the database that change. This reduces the size of the backup and the time 
+ it takes to backup and restore. It is a copy of the primary filegroup and read/write filegroups. To 
+ take advantage of this type of backup, you need to group together the tables that change into a set 
+ of filegroups and the tables that are static or history in a different set of filegroups. The filegroups 
+ containing historical data will be marked read/write or read-only. A partial backup normally includes 
+ the primary filegroup and read-write filegroups, but read-only filegroups can optionally be 
+ included. A partial backup can speed up the backup process for databases with large read-only areas. 
+ For example, a large database may have archival data that does not change, so there is no need to back 
+ it up every time, which reduces the amount of data to back up. 
+
+File/filegroup backup: 
+This is a copy of selected files or filegroups of a database. This method is typically used for large databases 
+ for which it is not feasible to do a full database backup. A transaction-log backup is needed with 
+ this backup type if the backup includes read/write files or filegroups. The challenge is maintaining 
+ the files, filegroups, and transaction-log backups because larger databases have many files and filegroups. 
+ It also requires more steps to restore the database. 
+
+Differential backup: 
+This is a copy of all the data that has changed since the last full backup. The SQL Server 2012 backup process identifies 
+ each changed extent and backs it up. Differentials are cumulative: If you do a full backup on Sunday night, 
+ the differential taken on Monday night includes all the changes since Sunday night. 
+ If you take another differential on Tuesday night, it includes all the changes since Sunday night. When 
+ restoring, you would restore the last full database backup and the most recent differential backup. 
+ Then you would restore any transaction-log backups since the last differential. This can mean quicker 
+ recovery. Whether differentials are good for you depends on what percentage of rows change between 
+ full database backups. As the percentage of rows changed approaches the number of rows in the database, 
+ the differential backup gets closer to the size of an entire database backup. When this occurs, 
+ it is often better to get another full database backup and start a new differential. Another benefit 
+ to use differentials is realized when a group of rows is repeatedly changed. Remember that a transaction 
+ log backup includes each change that is made. The differen- tial backup includes only the 
+ last change for a row. Imagine a database that keeps track of 100 stock values. The stock value is 
+ updated every minute. Each row is updated 1,440 times per day. Consider a full database backup on Sunday 
+ night and transaction-log back- ups during the week. At the end of the day Friday, restoring from 
+ all the transaction logs would mean that you have to replay each change to each row. In this case, 
+ each row would be updated 7,200 times (1,440 times/day times 5 days). When you include 100 stocks, 
+ the restore would have to replay 720,000 transactions. If you had done a differential backup at the 
+ end of each day, you would have to replace only the 100 rows. The differential keeps the most recent 
+ version only; and in some situations, it can be a great solution. 
+
+Partial differential backup: 
+This works the same as a differential backup but is matched to data from a partial backup. It is a copy 
+ of all extents modified since the last partial backup. To restore requires the partial backup. 
+
+File differential backup: 
+This is a copy of the file or filegroup of all extents modified since the last 
+ file or filegroup backup. A transaction-log backup is required after this backup for read/ write files 
+ or filegroups. Moreover, after the restore, you need to restore the transaction log as well. Using 
+ the file backup and file differential backup methods increases the complexity of the restore procedures. 
+ Furthermore, it may take longer to restore the complete database. 
+
+Copy-only backup: 
+This can be made for the database or transaction log. The copy-only backup does not interfere with the normal 
+ backup restore procedures. A normal full database backup resets the differential backups made afterward, 
+ whereas a copy-only backup does not affect the next differential backup; it still contains the 
+ changes since the last full backup. A copy-only backup of the transaction log does not truncate the 
+ log or affect the next normal transaction log backup. Copy-only backups are useful when you want to 
+ make a copy of the database for testing or development purposes without affecting the restore process. 
+ Copy- only backups are not supported in SSMS and must be done via T-SQL.
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>>
+
+Pure transaction-log backup: 
+This is when there have not been any bulk-logged operations performed 
+ on the database. That is, every data modification performed is represented in the transaction log. 
+The database recovery model can be in Full or Bulk-Logged mode, provided that no bulk-logged 
+ operation has been performed. This is the most common transaction- log backup type because 
+ it best protects the data and provides the capability to recover to a point in time. 
+
+Bulk transaction-log backup: 
+This is when bulk-logged operations have been performed in the database, so point-in-time 
+ recovery is not allowed. To improve performance on bulk operations — that is, to reduce transaction 
+ logging — the database can be set in the bulk- logged recovery model whereby only the allocation 
+ pages are logged, not the actual data modifications in the transaction log. During a transaction-log 
+ backup, SQL Server extracts and includes the bulk-logged data inside the transaction-log backup 
+ to allow recoverability. 
+
+Tail transaction-log backup: 
+This is a transaction-log backup that you make after the database has 
+ been damaged. Imagine you take a full database backup every night and do transaction-log backups on 
+ the hour. Your data files are corrupted at 1:30 P.M. Your last log backup occurred at 1:00 P.M., so 
+ you can recover until that time. What about the transactions that occurred between 1:00 P.M. and 1:30 
+ P.M.? The transaction log disk is still good, but you cannot do a normal transaction log backup now 
+ because the database is not accessible. The tail transaction-log backup enables you to do a final 
+ transaction log backup, even when the database is unavailable to capture the transactions between 1:00 
+ P.M. and 1:30 P.M. That way, you can restore up to 1:30 P.M. Whew — what a save! The biggest risk 
+ here is forgetting to do the backup. When you have confirmed that you must go through a restore, do 
+ this backup first. 
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+ The bulk-logged recovery model performs minimal logging for certain database operations, including 
+ bulk import operations, such as the following: BCP BULK INSERT SELECT INTO CREATE INDEX ALTER INDEX 
+ REBUILD DBCC DBREINDEX Instead of logging every modiﬁ cation for these database operations, the bulk-logged 
+ recovery model logs the extent allocations and ﬂ ags the changed extents. As a result, these 
+ operations execute faster, as they are minimally logged, but it presents possible data-loss risks for 
+ recovery. A transaction-log backup copies everything in the transaction log, checks the extents ﬂ 
+ agged as changed, and copies them from the data ﬁ les into the log backup. In addition, after a bulk-logged 
+ operation, point-in- time recovery using transaction-log backup is disallowed. Consider the 
+ same scenario presented earlier. 
+The database uses the bulk-logged recovery model. 
+The full database backup occurred at 1:00 P.M. A transaction log backup occurs at 1:30 P.M. Then a bulk-logged database 
+ operation is performed. Next, the physical drives containing the data ﬁ les fail at 2:00 P.M. You 
+ cannot recover up to 2:00 P.M. because the transaction-log backup would need to access the data ﬁ 
+ les to retrieve the data modiﬁ cations performed during the bulk-logged operations. You cannot perform 
+ a tail-log backup. As a result, data will be lost and you can only recover up to 1:30 P.M. When you 
+ do bulk operations in this mode, you are at risk of losing data until you complete a log backup after 
+ the bulk operations. You can minimize the data loss in this scenario with some bulk- logged database 
+ operations by implementing shorter transactions that perform transaction-log backups during and 
+ immediately after the bulk-logged operations. Oftentimes, this recovery model is used when the DBA 
+ performs bulk-logged operations and then switches back to full after the bulk-logged operation completes, 
+ to improve the performance for bulk operations. In addition, this model is commonly used in an 
+ OLAP or Report database for which there are nightly bulk data loads. A backup is taken, and afterward 
+ no data is modiﬁ ed during the day, so if the data is lost because of a failure, it can be restored 
+ from backup. 
+
+
+
+ The simple recovery model implements minimal logging, just like the bulk-logged recovery model, except 
+ that it keeps the transaction-log records only until the next checkpoint process occurs, writing 
+ the dirty changes to the data ﬁ les. Then the checkpoint process truncates the transaction log. Transaction-log 
+ backups are not allowed; therefore, point-in-time recovery is not available. Typically, 
+ this recovery model is used for development or test servers, where data loss is acceptable and data 
+ can be reloaded. Moreover, this model may be used by an OLAP and Reporting database for which there 
+ may be only a nightly data load and then a full or differential backup is performed. With this model, 
+ if the database were to fail during the data load, you would have to start from the beginning, unless 
+ a full or differential backup was taken during the process. In addition, if a DBA switches from 
+ one of the other recovery models to this one, the transaction-log continuity is broken, as it truncates 
+ the transaction log. In addition, during the time that the database is in this recovery mode, the 
+ database is more exposed to potential data loss. 
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>
+ Full Recovery Model Choose the full recovery model for a mission-critical database to keep data loss 
+ to a minimum because it is fully logged; and in case of damaged data ﬁ les, the tail transaction log 
+ can be backed up and used to restore the database to a given point in time. Therefore, OLTP production 
+ systems usually use the full recovery model, except when the database is modiﬁ ed nightly, as 
+ is sometimes the case with OLAP or Reporting databases. 
+
+
+ Bulk-Logged Recovery Model You can use the bulk-logged recovery model to increase bulk operations’ 
+ performance because it does minimal logging. For example, you could do a nightly bulk operation and 
+ then switch back to full recovery. The bulk-logged model will fully log, as is the case with the full 
+ recovery model, except for the bulk operations. Therefore, you could use bulk-logged recovery as a 
+ permanent recovery model, except it poses a risk of data loss. As long as there are no bulk-data operations, 
+ the DBA can back up the transaction log; but oftentimes, unknown to the DBA, the tail transaction-log 
+ backup recovery may no longer be available if a bulk operation has been performed. To guard 
+ against someone doing bulk operations without a database backup and to reduce that data risk, you 
+ should switch to bulk- logged only when a bulk operation needs to be performed. Bulk-logged can be 
+ a permanent recovery model in an OLAP or Report database where there is no daily modiﬁ cation activity, 
+ as there is limited data loss risk if the databases are backed up right after any nightly data 
+ load. There is no chance of data loss throughout the day, as nothing would have changed. In addition, 
+ some data loss may be acceptable, as the OLAP and Reporting databases can be reloaded from the OLTP 
+ data source whenever needed. 
+
+ Simple Recovery Model The simple recovery model does not save the transaction log; instead, the checkpoint 
+ process truncates it. Therefore, no one has to maintain the transaction log. This recovery model 
+ is commonly used for development, read-only, and test systems for which transaction-log backups 
+ are not required. If there is data loss, a new copy of the data can be reloaded from the OLTP data 
+ source. If the DBA switches to this recovery model from one of the others, the transaction- log continuity 
+ is broken because there is no way to back up the transaction log. In this recovery model, there 
+ is no point-in- time recovery because the DBA cannot back up the transaction log. Therefore, any 
+ restore would be from the previous full, and any differential, backups. 
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
