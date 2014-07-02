@@ -1,0 +1,17 @@
+ MSDB 
+ The msdb database contains SQL jobs, backup jobs, schedules, operators, and backup and restore 
+ histories and can contain Integration Services packages and other items. If you create a new job or 
+ add a new Integration Services package and msdb were to fail, the previous backup would not contain 
+ these new jobs and would need to be recreated.  
+ 
+ MASTER 
+ The master database contains the login information: metadata about each database for the SQL 
+ instance. Moreover, it contains SQL Server conﬁ guration information. For example, the database is 
+ altered every time you do the following: Add, remove, or modify a database level setting. Add or delete 
+ a user database. Add or remove a ﬁ le or ﬁ legroup in a user database. Add, remove, or modify a 
+ login`s security. Modify a SQL Server serverwide conﬁ guration. Add or remove a logical backup device. 
+ Conﬁ gure distributed queries or remote procedure calls (RPC). Add, modify, or remove a linked server 
+ or remote login. Although these modiﬁ cations occur infrequently, when they do, consider doing 
+ a full database backup. If a backup is not performed, you stand to lose the modiﬁ cations if a previous 
+ backup of the master is restored. Moreover, as a precautionary measure, before and after adding 
+ any service pack or hotﬁ x, perform a new backup of the master databas 
