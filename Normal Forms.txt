@@ -1,0 +1,4 @@
+Normal Forms:
+1st: Table Contains only atomic values & There are no repeating groups
+2nd: Table is in 1st normal form & All non-key attributes are fully functional dependent on the primary key
+3nd: Table is in 2st normal &  каждый неключевой атрибут «должен предоставлять информацию о ключе, полном ключе и ни о чём, кроме ключа»
