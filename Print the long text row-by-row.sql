@@ -2,7 +2,7 @@ SET NOCOUNT ON
 
 -- Define the len of the printed row
 DECLARE @stringLen INT = 100 
-
+ 
 -- An input text
 DECLARE @string NVARCHAR(max) = N'
 Full backup: This is a copy of all data in the database, including the transaction log. Using this backup type, you can restore the database to the point in time when the backup was taken. It is the most basic of the backups and is often required prior to any of the other backup types. When restoring from a full database backup, all the database files are restored without any other dependencies, the database is available, and it is transactionally consistent. Partial backup: This is a way to back up only those parts of the database that change. This reduces the size of the backup and the time it takes to backup and restore. It is a copy of the primary filegroup and read/write filegroups. To take advantage of this type of backup, you need to group together the tables that change into a set of filegroups and the tables that are static or history in a different set of filegroups. The filegroups containing historical data 
