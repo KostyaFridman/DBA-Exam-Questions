@@ -12,4 +12,39 @@ Dirty Reads – This is when you read uncommitted data, when doing this there is
 
 Phantom Reads – This is when data that you are working with has been changed by another transaction
 since you first read it in. This  means subsequent reads of this data in the same transaction could well be different. 
+
+Read uncommitted:
+It causes no shared locks to be requested which allows you to read data that is currently 
+ being modified in other transactions. It also allows other transactions to modify data that you are reading. 
+ 
+
+Read Committed:
+  This is the default isolation level and means selects will only return committed data. Select statements 
+ will issue shared lock requests against data you’re querying this causes you to wait if another 
+ transaction already has an exclusive lock on that data. Once you have your shared lock any other 
+ transactions trying to modify that data will request an exclusive lock and be made to wait until your 
+ Read Committed transaction finishes. 
+ 
+Repeatable Read:
+ This is similar to Read Committed but with the additional guarantee that if you issue the same select 
+ twice in a transaction you will get the same results both times. It does this by holding on to the 
+ shared locks it obtains on the records it reads until the end of the transaction, This means any transactions 
+ that try to modify these records are forced to wait for the read transaction to complete. 
+ 
+Serializable:
+ This isolation level takes Repeatable Read and adds the guarantee that no new data will be added eradicating 
+ the chance of getting Phantom Reads. It does this by placing range locks on the queried data. 
+ This causes any other transactions trying to modify or insert data touched on by this transaction 
+ to wait until it has finished. 
+ 
+Snapshot:
+ This provides the same guarantees as serializable. So what`s the difference? Well it’s more in the 
+ way it works, using snapshot doesn`t block other queries from inserting or updating the data touched 
+ by the snapshot transaction. Instead row versioning is used so when data is changed the old version 
+ is kept in tempdb so existing transactions will see the version without the change. When all transactions 
+ that started before the changes are complete the previous row version is removed from tempdb. 
+ This means that even if another transaction has made changes you will always get the same results as 
+ you did the first time in that transaction. So on the plus side your not blocking anyone else from 
+ modifying the data whilst you run your transaction but…. You’re using extra resources on the SQL Server 
+ to hold multiple versions of your changes. 
  
