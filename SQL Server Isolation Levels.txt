@@ -1,0 +1,15 @@
+http://gavindraper.com/2012/02/18/sql-server-isolation-levels-by-example/
+
+
+Read Uncommitted
+Read Committed (The default)
+Repeatable Read
+Serializable
+Snapshot
+
+Dirty Reads – This is when you read uncommitted data, when doing this there is no guarantee that data 
+ read will ever be committed meaning the data could well be bad. 
+
+Phantom Reads – This is when data that you are working with has been changed by another transaction
+since you first read it in. This  means subsequent reads of this data in the same transaction could well be different. 
+ 
